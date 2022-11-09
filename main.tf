@@ -53,25 +53,21 @@ resource "aws_codedeploy_deployment_group" "deployment_group" {
 }
 
 resource "aws_iam_role" "role" {
-  name = "example-role"
+  name               = "codedeploy-role"
+  assume_role_policy = data.aws_iam_policy_document.assume_role_codedeploy.json
+}
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "codedeploy.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
+data "aws_iam_policy_document" "assume_role_codedeploy" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["codedeploy.amazonaws.com"]
     }
-  ]
+  }
 }
-EOF
-}
-
 resource "aws_iam_role_policy_attachment" "AWSCodeDeployRole" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole"
   role       = aws_iam_role.role.name
